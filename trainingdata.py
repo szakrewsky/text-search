@@ -14,7 +14,7 @@ LABELS_INV = {i + 1: _SAMPLES[i] for i in range(0, len(_SAMPLES))}
 
 
 def load_raw(n=0):
-    rootdir = '/home/sz372/git/coupon-db/English/Fnt'
+    rootdir = '../coupon-db/English/Fnt'
     files = [os.path.join(subdir, file) for subdir, dirs, files in os.walk(rootdir) for file in files]
     if n > 0:
         files = np.random.choice(files, n)
