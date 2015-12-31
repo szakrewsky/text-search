@@ -5,13 +5,6 @@ import numpy as np
 import os
 import progressbar
 
-_NUMBERS =[chr(i) for i in range(48,58)]
-_UPPER = [chr(i) for i in range(65,91)]
-_LOWER = [chr(i) for i in range(97,123)]
-_SAMPLES = _NUMBERS + _UPPER + _LOWER
-LABELS = {_SAMPLES[i]: i + 1 for i in range(0, len(_SAMPLES))}
-LABELS_INV = {i + 1: _SAMPLES[i] for i in range(0, len(_SAMPLES))}
-
 
 def load_raw(n=0):
     rootdir = '../coupon-db/English/Fnt'

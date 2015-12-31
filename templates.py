@@ -1,7 +1,7 @@
 __author__ = 'sz372'
 
 import nltk
-
+import searchcriteria
 
 class Match(object):
 
@@ -58,6 +58,10 @@ def match(s, labels):
     for i,l in enumerate(labels):
         if l in templates:
             candidates = templates[l]
+            for c in candidates:
+                matches.extend(c.match(labels, i))
+        if l in searchcriteria._NUMBERS and '\d' in templates:
+            candidates = templates['\d']
             for c in candidates:
                 matches.extend(c.match(labels, i))
 
