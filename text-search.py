@@ -10,6 +10,7 @@ from classifier import load_classifier
 import cv2
 import docopt
 from features import hogdesc
+import mserfeatures
 import numpy as np
 import ocr
 from random import randint
@@ -52,9 +53,7 @@ if __name__ == '__main__':
         img_grey = cv2.addWeighted(img_grey, 1.5, blur, -0.5, 0)
 
         # text region features
-        mser = cv2.MSER_create()
-        points = mser.detectRegions(img_grey, None)
-        char_rects = map(cv2.boundingRect, points)
+        char_rects = mserfeatures.get_features(img_grey)
 
         # filter aspect ratio
         char_rects = [r for r in char_rects if 0.5 < float(r[2])/float(r[3]) < 2]
@@ -65,7 +64,7 @@ if __name__ == '__main__':
         vec = prepare_detect(img_grey, char_rects)
         char_results = classifier.predict(vec)
         char_results = char_results.reshape(-1)
-        print "took %ds" % (time.time() - start,)
+        print "took %fs" % (time.time() - start,)
 
         for w in words:
             sc = w['sc']
@@ -92,7 +91,7 @@ if __name__ == '__main__':
                 text = ocr.ocr(roi)
                 for m in templates.match(sc.tokens, text.lower()):
                     matches.append(r)
-            print "took %ds" % (time.time() - start,)
+            print "took %fs" % (time.time() - start,)
 
         start = time.time()
         print "Matching words and lines..."
@@ -106,7 +105,7 @@ if __name__ == '__main__':
                     if same_height(r1, r2) and (next_on_same_line(r1, r2) or on_consecutive_line(r1, r2)):
                         tmp.append(list(lm) + [r2])
             line_matches = tmp
-        print "took %ds" % (time.time() - start,)
+        print "took %fs" % (time.time() - start,)
 
         for lm in line_matches:
             color = (randint(0,255), randint(0,255), randint(0,255))
