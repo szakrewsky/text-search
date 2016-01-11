@@ -14,7 +14,7 @@ import mserfeatures
 import numpy as np
 import ocr
 from random import randint
-from rectutils import next_on_same_line, on_consecutive_line, same_height
+from rectutils import find_words, next_on_same_line, on_consecutive_line, same_height
 import searchcriteria
 from searchcriteria import SearchCriteria
 import templates
@@ -56,7 +56,14 @@ if __name__ == '__main__':
         char_rects = mserfeatures.get_features(img_grey)
 
         # filter aspect ratio
-        char_rects = [r for r in char_rects if 0.5 < float(r[2])/float(r[3]) < 2]
+        # char_rects = [r for r in char_rects if 0.5 < float(r[2])/float(r[3]) < 2]
+        #
+        # img1 = img.copy()
+        # utils.draw_rects(img1, char_rects)
+        # cv2.namedWindow('char rects', cv2.WINDOW_NORMAL)
+        # cv2.imshow('char rects', img1)
+
+        rect_word_rects = find_words(char_rects)
 
         # label features
         start = time.time()
@@ -70,6 +77,10 @@ if __name__ == '__main__':
             sc = w['sc']
             templates2d = w['templates2d']
             matches = w['matches']
+
+            if sc.tokens == ['{','}']:
+                matches.extend(rect_word_rects)
+                continue
 
             # word features
             char_matches = np.in1d(char_results, list(sc.indexset()))
@@ -111,6 +122,9 @@ if __name__ == '__main__':
             color = (randint(0,255), randint(0,255), randint(0,255))
             x, y, w, h = cv2.boundingRect(np.concatenate([utils.points(r) for r in lm]))
             img = cv2.rectangle(img, (x,y), (x+w,y+h), color, 2)
+            roi = img_grey[y:y+h,x:x+w]
+            text = ocr.ocr(roi)
+            print color, text
 
         cv2.namedWindow('Matches ' + i, cv2.WINDOW_NORMAL)
         cv2.imshow('Matches ' + i, img)

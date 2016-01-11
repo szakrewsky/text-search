@@ -98,3 +98,8 @@ def split_groups_on_horizontal_space(ctx, groups):
             new_rects.append(cv2.boundingRect(np.concatenate([points(r) for r in new_group])))
             new_groups.append(new_group)
     return new_groups, new_rects
+
+
+def draw_rects(img, rects):
+    for x, y, w, h in rects:
+        cv2.rectangle(img, (x, y), (x+w, y+h), (255,0,0))
