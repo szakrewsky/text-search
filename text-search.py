@@ -32,20 +32,31 @@ def prepare_detect(img, rects):
     return hogdesc(vec)
 
 
+def clip_coupon(img):
+    img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret, img_bin = cv2.threshold(img_grey ,127, 255, cv2.THRESH_BINARY)
+    imgc, contours, hierarchy = cv2.findContours(img_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours_area = np.array([cv2.contourArea(c) for c in contours])
+    main_contour = np.array(contours)[np.where(contours_area == contours_area.max())][0]
+    x, y, w, h = cv2.boundingRect(main_contour)
+    return img[y:y+h,x:x+w]
+
+
 if __name__ == '__main__':
 
     arguments = docopt.docopt(__doc__)
 
-    words = []
-    for w in arguments['<string>'].split(' '):
-        sc = SearchCriteria.parse(w)
-        templates2d = templates.get_templates(sc.tokens)
-        words.append({'word': w, 'sc': sc, 'templates2d': templates2d, 'matches': []})
-
     classifier = load_classifier()
 
     for i in arguments['<image>']:
+        words = []
+        for w in arguments['<string>'].split(' '):
+            sc = SearchCriteria.parse(w)
+            templates2d = templates.get_templates(sc.tokens)
+            words.append({'word': w, 'sc': sc, 'templates2d': templates2d, 'matches': []})
+
         img = cv2.imread(i)
+        img = clip_coupon(img)
         img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # sharpen image
@@ -54,16 +65,18 @@ if __name__ == '__main__':
 
         # text region features
         char_rects = mserfeatures.get_features(img_grey)
-
         # filter aspect ratio
-        # char_rects = [r for r in char_rects if 0.5 < float(r[2])/float(r[3]) < 2]
-        #
+        #non_char_rects = [r for r in char_rects if (1.0/5.0) > float(r[2])/float(r[3]) or float(r[2])/float(r[3]) > 5]
+        rect_word_rects = find_words(char_rects)
+        img_rects = mserfeatures.get_inverse_features_with_canny(img, char_rects)
+        #continue
+
         # img1 = img.copy()
         # utils.draw_rects(img1, char_rects)
-        # cv2.namedWindow('char rects', cv2.WINDOW_NORMAL)
-        # cv2.imshow('char rects', img1)
-
-        rect_word_rects = find_words(char_rects)
+        # cv2.namedWindow('img rects', cv2.WINDOW_NORMAL)
+        # cv2.imshow('img rects', img1)
+        # cv2.waitKey()
+        # quit()
 
         # label features
         start = time.time()
@@ -80,6 +93,10 @@ if __name__ == '__main__':
 
             if sc.tokens == ['{','}']:
                 matches.extend(rect_word_rects)
+                continue
+            elif sc.tokens == ['\\','i']:
+                #matches.extend(np.array(char_rects)[char_results == 0])
+                matches.extend(img_rects)
                 continue
 
             # word features
@@ -122,6 +139,7 @@ if __name__ == '__main__':
             color = (randint(0,255), randint(0,255), randint(0,255))
             x, y, w, h = cv2.boundingRect(np.concatenate([utils.points(r) for r in lm]))
             img = cv2.rectangle(img, (x,y), (x+w,y+h), color, 2)
+            # extract text of match
             roi = img_grey[y:y+h,x:x+w]
             text = ocr.ocr(roi)
             print color, text

@@ -27,3 +27,19 @@ def load_raw(n=0):
     print 'loaded %d samples' % (images.shape[0],)
 
     return images, labels
+
+
+def load_raw_non_char(n):
+    import cPickle
+    fo = open('../coupon-db/cifar-10-batches-py/data_batch_1', 'rb')
+    dict = cPickle.load(fo)
+    fo.close()
+    temp = dict['data'][0:n]
+    tempr = temp[:,0:1024].reshape((n,32,32))
+    tempg = temp[:,1024:2048].reshape((n,32,32))
+    tempb = temp[:,2048:3072].reshape((n,32,32))
+    temp = np.empty((n,32,32,3), dtype='uint8')
+    temp[:,:,:,0] = tempb
+    temp[:,:,:,1] = tempg
+    temp[:,:,:,2] = tempr
+    return temp
