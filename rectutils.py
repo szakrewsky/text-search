@@ -52,6 +52,24 @@ def filter_duplicates(rects):
     return rects
 
 
+def combine_inside(rects):
+    print "Combining %d regions..." % (len(rects))
+
+    C = np.zeros((len(rects), len(rects)), dtype=bool)
+    for i, r1 in enumerate(rects):
+        for j, r2 in enumerate(rects):
+            if (r1[0] <= r2[0] <= r1[0] + r1[2] and r1[0] <= r2[0] + r2[2] <= r1[0] + r1[2]
+                and r1[1] <= r2[1] <= r1[1] + r1[3] and r1[1] <= r2[1] + r2[3] <= r1[1] + r1[3]) or (
+                                        r2[0] <= r1[0] <= r2[0] + r2[2] and r2[0] <= r1[0] + r1[2] <= r2[0] + r2[2]
+                and r2[1] <= r1[1] <= r2[1] + r2[3] and r2[1] <= r1[1] + r1[3] <= r2[1] + r2[3]):
+                C[i, j] = True
+    rects =  __bfs_bbx(rects, C)
+
+    print "\tto %d regions" % (len(rects))
+    return rects
+
+
+
 def find_words(rects):
     C = np.zeros((len(rects), len(rects)), dtype=bool)
     for i, r1 in enumerate(rects):

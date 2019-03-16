@@ -9,11 +9,15 @@ _LABELS = {_SAMPLES[i]: i + 1 for i in range(0, len(_SAMPLES))}
 
 
 def get_label_value(i):
+    if(i == 0):
+        return '\I'
     return _SAMPLES[i-1]
 
 
 def _get_label_indices(token):
-    if token == '\d':
+    if token == '\I':
+        return [0]
+    elif token == '\d':
         return range(1,11)
     elif token in _LABELS:
         return [_LABELS[token.upper()], _LABELS[token.lower()]]

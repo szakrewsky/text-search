@@ -102,4 +102,4 @@ def split_groups_on_horizontal_space(ctx, groups):
 
 def draw_rects(img, rects):
     for x, y, w, h in rects:
-        cv2.rectangle(img, (x, y), (x+w, y+h), (255,0,0))
+        cv2.rectangle(img, (x, y), (x+w, y+h), (0,0,255), 2)
